@@ -24,6 +24,10 @@ int pc;
 int inst_mem[INST_MEM_SIZE]; //instruction memory
 int data_mem[DATA_MEM_SIZE]; //data memory
 
+//instruction 32bit version
+char instruction[32];
+
+
 //Control Unit
 typedef struct Execution {
 	char Regdst;
@@ -136,9 +140,9 @@ void fetch() //read address and make it bit
 {
 	int command = inst_mem[pc]; //read address and save command
 
-	for (int i = 31; i >= 0; i--) //regs[31] = LSB, regs[0] = MSB
+	for (int i = 31; i >= 0; i--) //instruction[31] = LSB, instruction[0] = MSB
 	{
-		regs[i] = command % 2;
+		instruction[i] = command % 2;
 		command = command >> 1;
 	}
 
@@ -281,11 +285,11 @@ void decode()
 		}
 		else
 		{
-			if (regs[16]) //negative number, sign-extend
+			if (instruction[16]) //negative number, sign-extend
 			{
 				for (int i = 16; i <= 31; i++) //make positive number - 1
 				{
-					regs[i] = !regs[i];
+					instruction[i] = !instruction[i];
 				}
 				make_decimal(&add, 16, 16); //decode address
 				add++; //recover lost 1
@@ -308,7 +312,7 @@ void make_decimal(int *decimal, int start, int size) //decode instruction to dec
 
 	for (i = start; i < start + size; i++)
 	{
-		if (regs[i])
+		if (instruction[i])
 		{
 			(*decimal)++;
 		}
