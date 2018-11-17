@@ -343,32 +343,27 @@ void alu_control(){
                 ALU_control_instrution = 0000;//AND
             case 35:
                 ALU_control_instrution = 0001;//OR
-                case
         }
     }
     else if(control.EX.op1 == 0 && control.EX.op0 == 0)//lw, sw
         ALU_control_instrution =.0010;
     else if(control.EX.op1 == 0 && control.EX.op0 == 1)//beq
         ALU_control_instrution = 0110;
-
 }
 
 void MUX(){
-    if(control.EX.op1 == 1 && control.EX.op0 == 0){//R-Format
-        if(control.EX.ALUsrc == 0)
+    if(control.EX.ALUsrc == 0){
+        if(control.EX.op1 == 1 && control.EX.op0 == 0){//R-Format
             //read data 2 rd
-            
-        if(control.EX.ALUsrc == 1)
+        if(control.EX.op1 == 0 && control.EX.op0 == 0)//lw, sw
+            //read data 2 rd
+    }
+    else if(control.EX.ALUsrc == 1){
+        if(control.EX.op1 == 1 && control.EX.op0 == 0){//R-Format
+            //sign extend
+        if(control.EX.op1 == 0 && control.EX.op0 == 1)//beq
             //sign extend
     }
-    else if(control.EX.op1 == 0 && control.EX.op0 == 0)//lw, sw{
-        if(control.EX.ALUsrc == 0)
-            //read data 2 rd
-        
-    else if(control.EX.op1 == 0 && control.EX.op0 == 1)//beq
-        if(control.EX.ALUsrc == 1)
-            //sign extend
-        
 }
 
 void add(int t0, int s1, int s2){
