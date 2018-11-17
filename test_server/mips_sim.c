@@ -352,17 +352,15 @@ void alu_control(){
 }
 
 void MUX(){
+    
+    int read1, read2;
+    
     if(control.EX.ALUsrc == 0){
-        if(control.EX.op1 == 1 && control.EX.op0 == 0){//R-Format
-            //read data 2 rd
-        if(control.EX.op1 == 0 && control.EX.op0 == 0)//lw, sw
-            //read data 2 rd
+        read1 = rt;
+        read2 = rd;
     }
     else if(control.EX.ALUsrc == 1){
-        if(control.EX.op1 == 1 && control.EX.op0 == 0){//R-Format
-            //sign extend
-        if(control.EX.op1 == 0 && control.EX.op0 == 1)//beq
-            //sign extend
+        //sign extend
     }
 }
 
