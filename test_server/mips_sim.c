@@ -351,7 +351,7 @@ void jr(){
 }
 
 void lw(){
-    
+    rt = rs + address;
 }
 
 void sw(){
@@ -365,5 +365,5 @@ void slti(int t0, int s1, int num){
 
 void beq(int rs, int rt){
     if(rs == rt)
-        pc += add;
+        pc += address;
 }
