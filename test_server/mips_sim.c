@@ -323,3 +323,47 @@ void make_decimal(int *decimal, int start, int size) //decode instruction to dec
 
 	return;
 }
+
+void add(int t0, int s1, int s2){
+    t0 = s1 + s2;
+}
+
+void addi(int t0, int s1, int num){
+    t0 = s1 + num;
+}
+
+void jal(){
+    
+}
+
+void j(){
+    if( control.jump == 1)
+        pc = jump_address;
+    else
+        return;
+}
+
+void jr(){
+    if( control.jump == 1)
+        regs[31] = pc + 4;
+    else
+        return;
+}
+
+void lw(){
+    
+}
+
+void sw(){
+    
+}
+
+void slti(int t0, int s1, int num){
+    if(s1 < num)
+        t0 = 1;
+}
+
+void beq(int rs, int rt){
+    if(rs == rt)
+        pc += add;
+}
