@@ -336,6 +336,7 @@ void make_decimal(int *decimal, int start, int size) //decode instruction to dec
 void exe(){
     alu_control();
     alu();
+	MUX2();
 }
 
 
@@ -358,7 +359,7 @@ void alu_control(){
         ALU_control_instrution = 0110;
 }
 
-void MUX(){
+void MUX1(){
     
     if(control.EX.ALUsrc == 0){
         read1 = rt;
@@ -369,8 +370,19 @@ void MUX(){
     }
 }
 
+void MUX2(){
+    
+    if(control.EX.ALUsrc == 0){
+        read1 = pc;
+        read2 = ALU_result;
+    }
+    else if(control.EX.ALUsrc == 1){
+        //sign extend
+    }
+}
+
 void alu(){
-    MUX();
+    MUX1();
     
     switch (ALU_control_instrution)
     {
@@ -432,14 +444,14 @@ void beq(){
 
 int AND(int a, int b){
     if(a == 0 && b == 0)
-	    return 0;
+	return 0;
 	else if( a + b > 1 || (a == 1 && b == 1))
-	    return 1;
+	return 1;
 }
 
 int OR(int a, int b){
     if(a * b == 1)
-	    return 1;
+	return 1;
 	else
-	    return 0;
+	return 0;
 }
