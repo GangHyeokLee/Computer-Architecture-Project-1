@@ -76,27 +76,28 @@ void fetch(); //regs[31] = LSB, regs[0] = MSB
 void decode();
 void exe();
 void mem();
-void wb(); 
+void wb();
 
 
 //sub_function
 void make_decimal(int* decimal, int start, int size); //decode instruction to decimal number
 void alu();
 void alu_control();
-void MUX1();
-void MUX2();
-void print_cycles(); 
+void MUX_for_ALU();
+void MUX_for_BRANCH();
+void print_cycles();
 void print_pc();
 void print_reg();
 int AND(int a, int b);
 int OR(int a, int b);
 int BEQ(int a, int b);
+void MUX_for_BRANCH();
 
 //main
 int main(int count, char *args[])
 {
 	char done = FALSE;
-	
+
 
 	if (count != 2)
 	{
@@ -134,18 +135,18 @@ int main(int count, char *args[])
 			print_pc();       //print pc
 			print_reg();    //print registers
 		}
-					 
+
 		cycles++;    //increase clock cycle
 
 		rs = rt = rd = shamt = funct = address = jump_address = 0; //reset every registers
 
-															   // check the exit condition
+																   // check the exit condition
 		if (regs[9] == 10)  //if value in $t1 is 10, finish the simulation
 			done = TRUE;
 
 		//if debug mode, print clock cycle, pc, reg
 	}
-	
+
 	if (strcmp(args[1], "1") == 0)
 	{
 		print_cycles();  //print clock cycles
@@ -363,10 +364,10 @@ void decode()
 	return;
 }
 
-void exe(){
-    alu_control();
-    alu();
-    MUX_for_BRANCH();
+void exe() {
+	alu_control();
+	alu();
+	MUX_for_BRANCH();
 }
 
 void mem()
@@ -378,7 +379,7 @@ void mem()
 	{
 		data_mem[ALU_result] = regs[rd];
 	}
-	
+
 	data_toWB_frommem = data_mem[ALU_result];
 
 	return;
@@ -435,25 +436,23 @@ void alu_control() {
 		ALU_control_instrution = 0110;
 }
 
-void MUX_for_ALU(){
-    
-    if(control.EX.ALUsrc == 0){
-        read1 = rt;
-        read2 = rd;
-    }
-    else if(control.EX.ALUsrc == 1){
-        //sign extend
-    }
+void MUX_for_ALU() {
+
+	if (control.EX.ALUsrc == 0) {
+		read1 = rt;
+		read2 = rd;
+	}
+	else if (control.EX.ALUsrc == 1) {
+		//sign extend
+	}
 }
 
-void MUX_for_BRANCH(){
-    
-    control
-    pc = AND(control.M.Branch, BEQ(rs,rt));
+void MUX_for_BRANCH() {
+		pc = AND(control.M.Branch, BEQ(rs, rt));
 }
 
 void alu() {
-	MUX1();
+	MUX_for_ALU();
 
 	switch (ALU_control_instrution)
 	{
@@ -482,11 +481,11 @@ int OR(int a, int b) {
 		return 0;
 }
 
-int BEQ(int a, int b){
-    if(a == b)
-        return 1;
-    else
-        return 0;
+int BEQ(int a, int b) {
+	if (a == b)
+		return 1;
+	else
+		return 0;
 }
 
 void print_cycles()
