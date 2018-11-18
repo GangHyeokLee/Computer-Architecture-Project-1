@@ -18,6 +18,12 @@ int jump_address; //for J-format
 //ALU Control
 int ALU_control_instrution;
 
+//MUX
+int read1, read2;
+
+//
+int ALU_result;
+
 // program counter
 int pc;
 
@@ -326,6 +332,7 @@ void make_decimal(int *decimal, int start, int size) //decode instruction to dec
     
     return;
 }
+
 void exe(){
     alu_control();
     alu();
