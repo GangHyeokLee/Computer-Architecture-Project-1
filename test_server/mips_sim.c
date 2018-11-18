@@ -19,6 +19,7 @@ int jump_address; //for J-format
 
 				  //ALU Control
 int ALU_control_instrution;
+int flag;
 
 //MUX
 int read1, read2;
