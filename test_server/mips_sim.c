@@ -117,6 +117,7 @@ int main(int count, char *args[])
 	init();
 	while (!done)
 	{
+		flag = 0;//initialze flag
 		printf("before fetch\n");
 		fetch();     //fetch an instruction from a instruction memory
 		printf("after fetch\n");
@@ -124,12 +125,10 @@ int main(int count, char *args[])
 		printf("after decode\n");
 		exe();       //perform the appropriate operation
 		printf("after exe\n");
-		if( flag == 1){//PASS MEM WB
-            		mem();       //access the data memory
-            		printf("after mem\n");
-            		wb();        //write result of arithmetic operation or data read from the data memory if required
-            		printf("after wb\n");
-        	}
+            	mem();       //access the data memory
+            	printf("after mem\n");
+            	wb();        //write result of arithmetic operation or data read from the data memory if required
+            	printf("after wb\n");
 		flag = 0;
 		if (strcmp(args[1], "0") == 0)
 		{
@@ -386,6 +385,9 @@ void exe() {
 
 void mem()
 {
+	if(flag == 1)//PASS
+		return;
+	
 	data_toWB_frommem = 0;
 	if (control.M.MemRead == 0)
 		return;
@@ -402,6 +404,9 @@ void mem()
 
 void wb()
 {
+	if(flag == 1)//PASS
+		return;
+	
 	jump_mux();
 	if (control.link == 1)
 	{
