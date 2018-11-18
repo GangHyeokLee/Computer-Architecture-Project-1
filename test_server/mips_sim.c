@@ -352,6 +352,7 @@ void decode()
 				make_decimal(&address, 16, 16); //decode address
 				address++; //recover lost 1
 				address *= -1; //make negative number
+				address /= 4; //make decimal offset
 			}
 			else //positive number
 			{
@@ -448,8 +449,12 @@ void MUX_for_ALU() {
 	}
 }
 
-void MUX_for_BRANCH() {
-		pc = AND(control.M.Branch, BEQ(rs, rt));
+void MUX_for_BRANCH()
+{
+	if (AND(control.M.Branch, BEQ(rs, rt)))
+	{
+		pc += address;
+	}
 }
 
 void alu() {
