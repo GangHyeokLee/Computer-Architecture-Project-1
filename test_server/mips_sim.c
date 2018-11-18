@@ -362,10 +362,10 @@ void decode()
 	return;
 }
 
-void exe() {
-	alu_control();
-	alu();
-	MUX2();
+void exe(){
+    alu_control();
+    alu();
+    MUX_for_BRANCH();
 }
 
 void mem()
@@ -434,26 +434,21 @@ void alu_control() {
 		ALU_control_instrution = 0110;
 }
 
-void MUX1() {
-
-	if (control.EX.ALUsrc == 0) {
-		read1 = rt;
-		read2 = rd;
-	}
-	else if (control.EX.ALUsrc == 1) {
-		//sign extend
-	}
+void MUX_for_ALU(){
+    
+    if(control.EX.ALUsrc == 0){
+        read1 = rt;
+        read2 = rd;
+    }
+    else if(control.EX.ALUsrc == 1){
+        //sign extend
+    }
 }
 
-void MUX2() {
-
-	if (control.EX.ALUsrc == 0) {
-		read1 = pc;
-		read2 = ALU_result;
-	}
-	else if (control.EX.ALUsrc == 1) {
-		//sign extend
-	}
+void MUX_for_BRANCH(){
+    
+    control
+    pc = AND(control.M.Branch, 1);
 }
 
 void alu() {
