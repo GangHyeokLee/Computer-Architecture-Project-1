@@ -90,6 +90,8 @@ void print_pc();
 void print_reg();
 int AND(int a, int b);
 int OR(int a, int b);
+void jump_mux();
+void slti(int t0, int s1, int num);
 
 //main
 int main(int count, char *args[])
@@ -138,7 +140,7 @@ int main(int count, char *args[])
 
 		Read_register1 = Read_register2 = Write_register = shamt = funct = address = jump_address = 0; //reset every registers
 
-																   // check the exit condition
+																									   // check the exit condition
 		if (regs[9] == 10)  //if value in $t1 is 10, finish the simulation
 			done = TRUE;
 
@@ -366,7 +368,7 @@ void decode()
 				make_decimal(&address, 16, 16); //decode address
 			}
 
-			if(opcode == 35 || opcode == 43) //for lw or sw
+			if (opcode == 35 || opcode == 43) //for lw or sw
 				address /= 4; //make decimal offset
 
 		}
@@ -398,6 +400,13 @@ void mem()
 
 void wb()
 {
+	jump_mux();
+	if (control.link == 1)
+	{
+		regs[31] = pc + 4;
+		return;
+	}
+
 	if (control.WB.RegWrite == 0)
 		return;
 
@@ -495,6 +504,20 @@ int OR(int a, int b) {
 		return 1;
 	else
 		return 0;
+}
+
+void slti(int t0, int s1, int num) {
+	if (s1 < num)
+		t0 = 1;
+}
+
+void jump_mux()
+{
+	if (control.jump == 1)
+	{
+		pc = jump_address;
+	}
+	return;
 }
 
 void print_cycles()
