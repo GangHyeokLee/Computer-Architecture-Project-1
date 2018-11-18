@@ -90,6 +90,7 @@ void print_pc();
 void print_reg();
 int AND(int a, int b);
 int OR(int a, int b);
+int BEQ(int a, int b);
 
 //main
 int main(int count, char *args[])
@@ -448,7 +449,7 @@ void MUX_for_ALU(){
 void MUX_for_BRANCH(){
     
     control
-    pc = AND(control.M.Branch, 1);
+    pc = AND(control.M.Branch, BEQ(rs,rt));
 }
 
 void alu() {
@@ -479,6 +480,13 @@ int OR(int a, int b) {
 		return 1;
 	else
 		return 0;
+}
+
+int BEQ(int a, int b){
+    if(a == b)
+        return 1;
+    else
+        return 0;
 }
 
 void print_cycles()
