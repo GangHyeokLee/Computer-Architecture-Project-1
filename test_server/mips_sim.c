@@ -10,9 +10,10 @@ long long cycles;
 
 // registers
 int regs[32];
-int rs, rt;
 
-int rd, shamt, funct; //for R-format
+int Read_register1, Read_register2, Write_register; //for decode
+
+int shamt, funct; //for R-format
 int address; //for I-format
 int jump_address; //for J-format
 
@@ -138,7 +139,7 @@ int main(int count, char *args[])
 
 		cycles++;    //increase clock cycle
 
-		rs = rt = rd = shamt = funct = address = jump_address = 0; //reset every registers
+		Read_register1 = Read_register2 = Write_register = shamt = funct = address = jump_address = 0; //reset every registers
 
 																   // check the exit condition
 		if (regs[9] == 10)  //if value in $t1 is 10, finish the simulation
@@ -332,16 +333,26 @@ void decode()
 	}
 	else
 	{
-		make_decimal(&rs, 6, 5); //decode rs
-		make_decimal(&rt, 11, 5); //decode rt
+		make_decimal(&Read_register1, 6, 5); //decode Read register1
 
+		if (control.EX.Regdst) //RegDst MUX
+		{
+			make_decimal(&Read_register2, 11, 5); //decode Read register2
+		}
+		else
+		{
+			make_decimal(&Write_register, 11, 5); //decode Read Write register
+		}
+
+
+		//decode rest part
 		if (control.EX.Regdst == 1) //for R-format
 		{
-			make_decimal(&rd, 16, 5); //decode rd
+			make_decimal(&Write_register, 16, 5); //decode Write register
 			make_decimal(&shamt, 21, 5); //decode shift amount
 			make_decimal(&funct, 26, 6); //decode function
 		}
-		else
+		else //for I-format
 		{
 			if (instruction[16]) //negative number, sign-extend
 			{
@@ -352,12 +363,12 @@ void decode()
 				make_decimal(&address, 16, 16); //decode address
 				address++; //recover lost 1
 				address *= -1; //make negative number
-				address /= 4; //make decimal offset
 			}
 			else //positive number
 			{
 				make_decimal(&address, 16, 16); //decode address
 			}
+			address /= 4; //make decimal offset
 
 		}
 	}
@@ -379,7 +390,7 @@ void mem()
 
 	if (control.M.MemWrite == 1)
 	{
-		data_mem[ALU_result] = regs[rd];
+		data_mem[ALU_result] = regs[Write_register];
 	}
 
 	data_toWB_frommem = data_mem[ALU_result];
@@ -393,8 +404,8 @@ void wb()
 		return;
 
 	if (control.WB.MemtoReg == 1)
-		regs[rd] = data_toWB_frommem;
-	else regs[rd] = ALU_result;
+		regs[Write_register] = data_toWB_frommem;
+	else regs[Write_register] = ALU_result;
 
 	return;
 
@@ -439,13 +450,12 @@ void alu_control() {
 }
 
 void MUX_for_ALU() {
-
+	read1 = Read_register1;
 	if (control.EX.ALUsrc == 0) {
-		read1 = rt;
-		read2 = rd;
+		read2 = Read_register2;
 	}
 	else if (control.EX.ALUsrc == 1) {
-		//sign extend
+		read2 = address;
 	}
 }
 
@@ -464,12 +474,16 @@ void alu() {
 	{
 	case 0010://add
 		ALU_result = read1 + read2;
+		break;
 	case 0110://subtract
 		ALU_result = read1 - read2;
+		break;
 	case 0000://and
 		ALU_result = AND(read1, read2);
+		break;
 	case 0001://OR
 		ALU_result = OR(read1, read2);
+		break;
 
 	}
 }
