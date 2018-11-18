@@ -85,14 +85,12 @@ void make_decimal(int* decimal, int start, int size); //decode instruction to de
 void alu();
 void alu_control();
 void MUX_for_ALU();
-void MUX_for_BRANCH();
 void print_cycles();
 void print_pc();
 void print_reg();
 int AND(int a, int b);
 int OR(int a, int b);
 int BEQ(int a, int b);
-void MUX_for_BRANCH();
 
 //main
 int main(int count, char *args[])
@@ -459,14 +457,6 @@ void MUX_for_ALU() {
 	}
 }
 
-void MUX_for_BRANCH()
-{
-	if (AND(control.M.Branch, BEQ(rs, rt)))
-	{
-		pc += address;
-	}
-}
-
 void alu() {
 	MUX_for_ALU();
 
@@ -477,6 +467,12 @@ void alu() {
 		break;
 	case 0110://subtract
 		ALU_result = read1 - read2;
+
+		if (AND(control.M.Branch, !(ALU_result))) //MUX for Branch
+		{
+			pc += address;
+		}
+
 		break;
 	case 0000://and
 		ALU_result = AND(read1, read2);
@@ -495,14 +491,7 @@ int AND(int a, int b) {
 }
 
 int OR(int a, int b) {
-	if (a * b == 1)
-		return 1;
-	else
-		return 0;
-}
-
-int BEQ(int a, int b) {
-	if (a == b)
+	if (a + b == 1)
 		return 1;
 	else
 		return 0;
