@@ -372,6 +372,7 @@ void exe() {
 
 void mem()
 {
+	data_toWB_frommem = 0;
 	if (control.M.MemRead == 0)
 		return;
 
