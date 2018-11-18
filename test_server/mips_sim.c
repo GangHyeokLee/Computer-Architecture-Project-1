@@ -128,7 +128,7 @@ int main(int count, char *args[])
 		wb();        //write result of arithmetic operation or data read from the data memory if required
 		printf("after wb\n");
 
-		if (strcmp(args[0], "0") == 0)
+		if (strcmp(args[1], "0") == 0)
 		{
 			print_cycles();  //print clock cycles
 			print_pc();       //print pc
@@ -146,7 +146,7 @@ int main(int count, char *args[])
 		//if debug mode, print clock cycle, pc, reg
 	}
 	
-	if (strcmp(args[0], "1") == 0)
+	if (strcmp(args[1], "1") == 0)
 	{
 		print_cycles();  //print clock cycles
 		print_pc();       //print pc
