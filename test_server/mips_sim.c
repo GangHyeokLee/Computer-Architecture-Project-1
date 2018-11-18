@@ -124,11 +124,13 @@ int main(int count, char *args[])
 		printf("after decode\n");
 		exe();       //perform the appropriate operation
 		printf("after exe\n");
-		mem();       //access the data memory
-		printf("after mem\n");
-		wb();        //write result of arithmetic operation or data read from the data memory if required
-		printf("after wb\n");
-
+		if( flag == 1){//PASS MEM WB
+            		mem();       //access the data memory
+            		printf("after mem\n");
+            		wb();        //write result of arithmetic operation or data read from the data memory if required
+            		printf("after wb\n");
+        	}
+		flag = 0;
 		if (strcmp(args[1], "0") == 0)
 		{
 			print_cycles();  //print clock cycles
@@ -440,6 +442,10 @@ void make_decimal(int *decimal, int start, int size) //decode instruction to dec
 void alu_control() {
 	if (control.EX.ALUOp1 == 1 && control.EX.ALUOp0 == 0) {//R-Format
 		switch (funct) {
+		case 8://jr
+                	flag = 1;
+            	case 10://slti
+                	flag = 1;
 		case 32:
 			ALU_control_instrution = 0010;//add
 		case 34:
