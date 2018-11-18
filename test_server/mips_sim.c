@@ -514,17 +514,17 @@ void print_reg()
 	printf("R18	[s2] = %x\n", regs[18]);
 	printf("R19	[s3] = %x\n", regs[19]);
 	printf("R20	[s4] = %x\n", regs[10]);
-	printf("R21	[s5] = %x\n", data_mem[regs[21]]);
-	printf("R22	[s6] = %x\n", data_mem[regs[22]]);
-	printf("R23	[s7] = %x\n", data_mem[regs[23]]);
-	printf("R24	[t8] = %x\n", data_mem[regs[24]]);
-	printf("R25	[t9] = %x\n", data_mem[regs[25]]);
-	printf("R26	[k0] = %x\n", data_mem[regs[26]]);
-	printf("R27	[k1] = %x\n", data_mem[regs[27]]);
-	printf("R28	[gp] = %x\n", data_mem[regs[28]]);
-	printf("R29	[sp] = %x\n", data_mem[regs[29]]);
-	printf("R30	[s8] = %x\n", data_mem[regs[30]]);
-	printf("R31	[ra] = %x\n", data_mem[regs[31]]);
+	printf("R21	[s5] = %x\n", regs[21]);
+	printf("R22	[s6] = %x\n", regs[22]);
+	printf("R23	[s7] = %x\n", regs[23]);
+	printf("R24	[t8] = %x\n", regs[24]);
+	printf("R25	[t9] = %x\n", regs[25]);
+	printf("R26	[k0] = %x\n", regs[26]);
+	printf("R27	[k1] = %x\n", regs[27]);
+	printf("R28	[gp] = %x\n", regs[28]);
+	printf("R29	[sp] = %x\n", regs[29]);
+	printf("R30	[s8] = %x\n", regs[30]);
+	printf("R31	[ra] = %x\n", regs[31]);
 
 	return;
 }
