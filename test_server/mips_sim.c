@@ -326,14 +326,14 @@ void make_decimal(int *decimal, int start, int size) //decode instruction to dec
     
     return;
 }
-
-void alu(){
-    MUX();
-    
+void exe(){
+    alu_control();
+    alu();
 }
 
+
 void alu_control(){
-    if(control.EX.op1 == 1 && control.EX.op0 == 0){//R-Format
+    if(control.EX.ALUOp1 == 1 && control.EX.ALUOp0 == 0){//R-Format
         switch(funct){
             case 32:
                 ALU_control_instrution = 0010;//add
@@ -345,15 +345,13 @@ void alu_control(){
                 ALU_control_instrution = 0001;//OR
         }
     }
-    else if(control.EX.op1 == 0 && control.EX.op0 == 0)//lw, sw
-        ALU_control_instrution =.0010;
-    else if(control.EX.op1 == 0 && control.EX.op0 == 1)//beq
+    else if(control.EX.ALUOp1 == 0 && control.EX.ALUOp0 == 0)//lw, sw
+        ALU_control_instrution = 0010;
+    else if(control.EX.ALUOp1 == 0 && control.EX.ALUOp0 == 1)//beq
         ALU_control_instrution = 0110;
 }
 
 void MUX(){
-    
-    int read1, read2;
     
     if(control.EX.ALUsrc == 0){
         read1 = rt;
@@ -361,6 +359,23 @@ void MUX(){
     }
     else if(control.EX.ALUsrc == 1){
         //sign extend
+    }
+}
+
+void alu(){
+    MUX();
+    
+    switch (ALU_control_instrution)
+    {
+        case 0010://add
+            ALU_result = read1 + read2;
+        case 0110://subtract
+            ALU_result = read1 - read2;
+        case 0000://and
+            ALU_result =
+        case 0001://OR
+            return
+            
     }
 }
 
@@ -403,7 +418,11 @@ void slti(int t0, int s1, int num){
         t0 = 1;
 }
 
-void beq(int rs, int rt){
+void beq(){
     if(rs == rt)
         pc += address;
+}
+
+int AND(int a, int b){
+    if(a )
 }
