@@ -90,7 +90,6 @@ void print_pc();
 void print_reg();
 int AND(int a, int b);
 int OR(int a, int b);
-int BEQ(int a, int b);
 
 //main
 int main(int count, char *args[])
@@ -366,7 +365,9 @@ void decode()
 			{
 				make_decimal(&address, 16, 16); //decode address
 			}
-			address /= 4; //make decimal offset
+
+			if(opcode == 35 || opcode == 43) //for lw or sw
+				address /= 4; //make decimal offset
 
 		}
 	}
@@ -377,7 +378,6 @@ void decode()
 void exe() {
 	alu_control();
 	alu();
-	MUX_for_BRANCH();
 }
 
 void mem()
