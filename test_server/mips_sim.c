@@ -507,6 +507,8 @@ void alu() {
         case 0001://OR
             ALU_result = OR(read1, read2);
             break;
+		case 1011:
+			ALU_result = read1 < read2;
             
     }
 }
@@ -522,11 +524,6 @@ int OR(int a, int b) {
         return 1;
     else
         return 0;
-}
-
-void slti(int t0, int s1, int num) {
-    if (s1 < num)
-        t0 = 1;
 }
 
 void jump_mux()
