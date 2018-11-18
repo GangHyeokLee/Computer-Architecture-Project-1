@@ -379,9 +379,9 @@ void alu(){
         case 0110://subtract
             ALU_result = read1 - read2;
         case 0000://and
-            ALU_result =
+            ALU_result = AND(read1, read2);
         case 0001://OR
-            return
+            ALU_result = OR(read1, read2);
             
     }
 }
@@ -431,5 +431,15 @@ void beq(){
 }
 
 int AND(int a, int b){
-    if(a )
+    if(a == 0 && b == 0)
+	    return 0;
+	else if( a + b > 1 || (a == 1 && b == 1))
+	    return 1;
+}
+
+int OR(int a, int b){
+    if(a * b == 1)
+	    return 1;
+	else
+	    return 0;
 }
