@@ -404,16 +404,16 @@ void mem()
 }
 
 void wb()
-{
-	if(flag == 1)//PASS
-		return;
-	
+{	
 	jump_mux();
 	if (control.link == 1)
 	{
 		regs[31] = pc + 4;
 		return;
 	}
+	
+	if(flag == 1)//PASS
+		return;
 
 	if (control.WB.RegWrite == 0)
 		return;
@@ -450,7 +450,7 @@ void alu_control() {
 		switch (funct) {
 		case 8://jr
                 	flag = 1;
-            	case 10://slti
+            	case 11://slti
                 	flag = 1;
 		case 32:
 			ALU_control_instrution = 0010;//add
