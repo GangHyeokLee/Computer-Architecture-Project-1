@@ -95,28 +95,37 @@ int OR(int a, int b);
 int main(int count, char *args[])
 {
 	char done = FALSE;
+	
 
 	if (count != 2)
-		printf("Wrong type\n"); return 0;
+	{
+		printf("Wrong type\n");
+		return 0;
+	}
 
 	if (strcmp(args[1], "0") == 0)
 		printf("Debug Mode\n");
 	else if (strcmp(args[1], "1") == 0)
 		printf("Run Mode\n");
-	else
-		printf("Wrong type\n"); return 0;
+	else {
+		printf("Wrong type\n");
+		return 0;
+	}
 
 	init();
 	while (!done)
 	{
-		//printf("before fetch\n");
+		printf("before fetch\n");
 		fetch();     //fetch an instruction from a instruction memory
-		//printf("after fetch\n");
+		printf("after fetch\n");
 		decode();    //decode the instruction and read data from register file
-		//printf("after decode\n");
+		printf("after decode\n");
 		exe();       //perform the appropriate operation
+		printf("after exe\n");
 		mem();       //access the data memory
+		printf("after mem\n");
 		wb();        //write result of arithmetic operation or data read from the data memory if required
+		printf("after wb\n");
 
 		if (strcmp(args[0], "0") == 0)
 		{
