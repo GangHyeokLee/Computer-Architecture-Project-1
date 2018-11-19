@@ -136,7 +136,7 @@ int main(int count, char *args[])
 			print_reg();    //print registers
 		}
 
-		Read_register1 = Read_register2 = Write_register = shamt = funct = address = jump_address = data_toWB_frommem = 0;//reset every registers
+		Read_register1 = Read_register2 = Write_register = shamt = funct = address = jump_address = data_toWB_frommem = 0;//reset
 
 																														  // check the exit condition
 		if (regs[9] == 10)  //if value in $t1 is 10, finish the simulation
@@ -522,6 +522,7 @@ int OR(int a, int b)
 	else return 1;
 }
 
+//jump 판단하는 MUX입니다.
 void jump_mux()
 {
 	if (control.jump == 1)
@@ -578,7 +579,7 @@ void print_reg()
 	printf("R28	[gp] = %x\n", regs[28]);
 	printf("R29	[sp] = %x\n", regs[29]);
 	printf("R30	[s8] = %x\n", regs[30]);
-	printf("R31	[ra] = %x\n", regs[31]);
+	printf("R31	[ra] = %x\n\n", regs[31]);
 
 	return;
 }
