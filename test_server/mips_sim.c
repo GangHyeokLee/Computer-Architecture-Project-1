@@ -90,7 +90,6 @@ void MUX_for_ALU();
 void print_cycles();
 void print_pc();
 void print_reg();
-void jump_mux();
 
 //main
 int main(int count, char *args[])
