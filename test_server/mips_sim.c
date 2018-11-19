@@ -90,10 +90,6 @@ void MUX_for_ALU();
 void print_cycles();
 void print_pc();
 void print_reg();
-int AND(int a, int b);
-int OR(int a, int b);
-void jump_mux();
-void slti(int t0, int s1, int num);
 
 //main
 int main(int count, char *args[])
@@ -403,7 +399,11 @@ void wb()
 	{
 		regs[31] = pc;
 	}
-	jump_mux();
+	
+	if (control.jump == 1)
+	{
+		pc = jump_address;
+	}
 
 	if (flag == 1)//PASS
 		return;
@@ -497,39 +497,15 @@ void alu()
 
 		break;
 	case 0000://and
-		ALU_result = AND(read1, read2);
+		ALU_result = read1 & read2;
 		break;
 	case 0001://OR
-		ALU_result = OR(read1, read2);
+		ALU_result = read1 | read2;
 		break;
 	case 1011:
 		ALU_result = read1 < read2;
 
 	}
-}
-
-int AND(int a, int b)
-{
-	if (a + b == 1)
-		return 1;
-	else return 0;
-}
-
-int OR(int a, int b)
-{
-	if (a == 0 && b == 0)
-		return 0;
-	else return 1;
-}
-
-//jump 판단하는 MUX입니다.
-void jump_mux()
-{
-	if (control.jump == 1)
-	{
-		pc = jump_address;
-	}
-	return;
 }
 
 void print_cycles()
