@@ -130,7 +130,6 @@ int main(int count, char *args[])
         printf("after mem\n");
         wb();        //write result of arithmetic operation or data read from the data memory if required
         printf("after wb\n");
-        flag = 0;
         if (strcmp(args[1], "0") == 0)
         {
             print_cycles();  //print clock cycles
@@ -286,8 +285,8 @@ void decode()
             break;
         case 10: //set less than immediate, i
             control.EX.Regdst = 0;
-            control.EX.ALUOp1 = 0;
-            control.EX.ALUOp0 = 0;
+            control.EX.ALUOp1 = 1;
+            control.EX.ALUOp0 = 1;
             control.EX.ALUsrc = 1;
             control.M.Branch = 0;
             control.M.MemRead = 0;
@@ -328,6 +327,7 @@ void decode()
     /*calculating address*/
     if (control.jump == 1) //for J-format
     {
+		flag = 1;
         make_decimal(&jump_address, 6, 26); //decode jump address
         pc_for_concat = (pc & 4026531840); //copy MSB 4bit
         jump_address += pc_for_concat; //concatenate
@@ -336,7 +336,7 @@ void decode()
     {
         make_decimal(&Read_register1, 6, 5); //decode Read register1
         
-        if (control.EX.Regdst) //RegDst MUX
+        if (control.EX.Regdst == 1) //RegDst MUX
         {
             make_decimal(&Read_register2, 11, 5); //decode Read register2
         }
@@ -369,10 +369,6 @@ void decode()
             {
                 make_decimal(&address, 16, 16); //decode address
             }
-            
-            if (opcode == 35 || opcode == 43) //for lw or sw
-                address /= 4; //make decimal offset
-            
         }
     }
     
@@ -390,14 +386,16 @@ void mem()
         return;
     
     data_toWB_frommem = 0;
-    if (control.M.MemRead == 0)
-        return;
     
     if (control.M.MemWrite == 1)
     {
         data_mem[ALU_result] = regs[Write_register];
     }
     
+	if (control.M.MemRead == 0)
+		return;
+
+
     data_toWB_frommem = data_mem[ALU_result];
     
     return;
@@ -405,12 +403,11 @@ void mem()
 
 void wb()
 {
-    jump_mux();
     if (control.link == 1)
     {
-        regs[31] = pc + 4;
-        return;
+        regs[31] = pc;
     }
+	jump_mux();
     
     if(flag == 1)//PASS
         return;
@@ -422,9 +419,7 @@ void wb()
         regs[Write_register] = data_toWB_frommem;
     else regs[Write_register] = ALU_result;
     
-    return;
-    
-    
+    return;    
 }
 
 void make_decimal(int *decimal, int start, int size) //decode instruction to decimal number
@@ -450,9 +445,7 @@ void alu_control() {
         switch (funct) {
             case 8://jr
                 flag = 1;
-                break;
-            case 11://slti
-                ALU_control_instrution = 1011;
+				pc = regs[31]; //update pc
                 break;
             case 32:
                 ALU_control_instrution = 0010;//add
@@ -469,13 +462,15 @@ void alu_control() {
         }
     }
     else if (control.EX.ALUOp1 == 0 && control.EX.ALUOp0 == 0)//lw, sw
-        ALU_control_instrution = 0010;
+		ALU_control_instrution = 0010;
     else if (control.EX.ALUOp1 == 0 && control.EX.ALUOp0 == 1)//beq
         ALU_control_instrution = 0110;
+	else if (control.EX.ALUOp1 == 1 && control.EX.ALUOp0 == 1)//slti
+		ALU_control_instrution = 1011;
 }
 
 void MUX_for_ALU() {
-    read1 = Read_register1;
+    read1 = regs[Read_register1];
     if (control.EX.ALUsrc == 0) {
         read2 = Read_register2;
     }
@@ -495,7 +490,7 @@ void alu() {
         case 0110://subtract
             ALU_result = read1 - read2;
             
-            if (AND(control.M.Branch, !(ALU_result))) //MUX for Branch
+            if (control.M.Branch&& !(ALU_result)) //MUX for Branch
             {
                 pc += address;
             }
