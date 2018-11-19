@@ -24,9 +24,10 @@ int flag;
 //MUX
 int read1, read2;
 
-//
+//exe ALU result
 int ALU_result;
 
+//data from mem to wb
 int data_toWB_frommem = 0;
 
 // program counter
@@ -110,7 +111,8 @@ int main(int count, char *args[])
         printf("Debug Mode\n");
     else if (strcmp(args[1], "1") == 0)
         printf("Run Mode\n");
-    else {
+    else
+    {
         printf("Wrong type\n");
         return 0;
     }
@@ -119,17 +121,11 @@ int main(int count, char *args[])
     while (!done)
     {
         flag = 0;//initialze flag
-        //printf("before fetch\n");
         fetch();     //fetch an instruction from a instruction memory
-        //printf("after fetch\n");
         decode();    //decode the instruction and read data from register file
-        //printf("after decode\n");
         exe();       //perform the appropriate operation
-        //printf("after exe\n");
         mem();       //access the data memory
-        //printf("after mem\n");
         wb();        //write result of arithmetic operation or data read from the data memory if required
-        //printf("after wb\n");
         if (strcmp(args[1], "0") == 0)
         {
             print_cycles();  //print clock cycles
@@ -139,7 +135,7 @@ int main(int count, char *args[])
         
         cycles++;    //increase clock cycle
         
-        Read_register1 = Read_register2 = Write_register = shamt = funct = address = jump_address = 0; //reset every registers
+        Read_register1 = Read_register2 = Write_register = shamt = funct = address = jump_address = data_toWB_frommem = 0;//reset every registers
         
         // check the exit condition
         if (regs[9] == 10)  //if value in $t1 is 10, finish the simulation
@@ -375,7 +371,8 @@ void decode()
     return;
 }
 
-void exe() {
+void exe()
+{
     alu_control();
     alu();
 }
@@ -384,8 +381,6 @@ void mem()
 {
     if(flag == 1)//PASS
         return;
-    
-    data_toWB_frommem = 0;
     
     if (control.M.MemWrite == 1)
     {
@@ -422,7 +417,8 @@ void wb()
     return;    
 }
 
-void make_decimal(int *decimal, int start, int size) //decode instruction to decimal number
+//decode instruction to decimal number
+void make_decimal(int *decimal, int start, int size)
 {
     int i;
     
@@ -440,7 +436,8 @@ void make_decimal(int *decimal, int start, int size) //decode instruction to dec
     return;
 }
 
-void alu_control() {
+void alu_control()
+{
     if (control.EX.ALUOp1 == 1 && control.EX.ALUOp0 == 0) {//R-Format
         switch (funct) {
             case 8://jr
@@ -469,7 +466,8 @@ void alu_control() {
 		ALU_control_instrution = 1011;
 }
 
-void MUX_for_ALU() {
+void MUX_for_ALU()
+{
     read1 = regs[Read_register1];
     if (control.EX.ALUsrc == 0) {
         read2 = Read_register2;
@@ -479,7 +477,8 @@ void MUX_for_ALU() {
     }
 }
 
-void alu() {
+void alu()
+{
     MUX_for_ALU();
     
     switch (ALU_control_instrution)
@@ -508,17 +507,18 @@ void alu() {
     }
 }
 
-int AND(int a, int b) {
-    if (a == 0 && b == 0)
-        return 0;
-    else return 1;
+int AND(int a, int b)
+{
+     if (a + b == 1)
+        return 1;
+    else return 0;
 }
 
-int OR(int a, int b) {
-    if (a + b == 1)
-        return 1;
-    else
+int OR(int a, int b)
+{
+	if (a == 0 && b == 0)
         return 0;
+    else return 1;
 }
 
 void jump_mux()
