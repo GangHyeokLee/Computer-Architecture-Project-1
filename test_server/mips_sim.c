@@ -119,17 +119,17 @@ int main(int count, char *args[])
     while (!done)
     {
         flag = 0;//initialze flag
-        printf("before fetch\n");
+        //printf("before fetch\n");
         fetch();     //fetch an instruction from a instruction memory
-        printf("after fetch\n");
+        //printf("after fetch\n");
         decode();    //decode the instruction and read data from register file
-        printf("after decode\n");
+        //printf("after decode\n");
         exe();       //perform the appropriate operation
-        printf("after exe\n");
+        //printf("after exe\n");
         mem();       //access the data memory
-        printf("after mem\n");
+        //printf("after mem\n");
         wb();        //write result of arithmetic operation or data read from the data memory if required
-        printf("after wb\n");
+        //printf("after wb\n");
         if (strcmp(args[1], "0") == 0)
         {
             print_cycles();  //print clock cycles
