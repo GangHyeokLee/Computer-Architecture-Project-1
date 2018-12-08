@@ -1,0 +1,5 @@
+void init_cache(int cache_size, int block_size, int assoc, RPL repl_policy); : 신성한
+BOOL isHit(ADDR addr); : 이강혁
+ADDR insert_to_cache(ADDR addr); : 유송은
+
+print_stat(); : 미정
