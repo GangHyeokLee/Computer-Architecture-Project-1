@@ -1,0 +1,9 @@
+﻿  mips_sim.c
+d:\이강혁\documents\학교\수업자료\2018.2\컴퓨터구조\프로젝트\project_1_mips_simulator\mips simulator\mips simulator\mips_sim.c(161): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\stdio.h(208): note: 'fopen' 선언을 참조하십시오.
+d:\이강혁\documents\학교\수업자료\2018.2\컴퓨터구조\프로젝트\project_1_mips_simulator\mips simulator\mips simulator\mips_sim.c(173): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\stdio.h(1197): note: 'fscanf' 선언을 참조하십시오.
+d:\이강혁\documents\학교\수업자료\2018.2\컴퓨터구조\프로젝트\project_1_mips_simulator\mips simulator\mips simulator\mips_sim.c(513): warning C4477: 'printf' : 서식 문자열 '%d'에 'int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 '__int64'입니다.
+  d:\이강혁\documents\학교\수업자료\2018.2\컴퓨터구조\프로젝트\project_1_mips_simulator\mips simulator\mips simulator\mips_sim.c(513): note: 서식 문자열에서 '%lld'을(를) 사용하는 것이 좋습니다.
+  d:\이강혁\documents\학교\수업자료\2018.2\컴퓨터구조\프로젝트\project_1_mips_simulator\mips simulator\mips simulator\mips_sim.c(513): note: 서식 문자열에서 '%I64d'을(를) 사용하는 것이 좋습니다.
+  MIPS Simulator.vcxproj -> D:\이강혁\Documents\학교\수업자료\2018.2\컴퓨터구조\프로젝트\Project_1_MIPS_Simulator\MIPS Simulator\Debug\MIPS Simulator.exe
