@@ -16,8 +16,8 @@ typedef struct _MEMACCESS{
 typedef enum _RPL{LRU=0, RAND=1} RPL;
 
 struct CACHE {
-    int address;
-    char data;
+    int address;	//tag, index, offset
+    char data;		//DATA Field
 };
 CACHE cache;
 int CACHE_size;
