@@ -15,10 +15,11 @@ typedef struct _MEMACCESS{
 
 typedef enum _RPL{LRU=0, RAND=1} RPL;
 
-
+int CACHE;
 int CACHE_size;
 int ASSOCIATIVITY;
 int BLOCK_size;
+int num_BLOCK = 0;
 RPL REPLACEMENT_policy;
 
 //misc. function
@@ -162,5 +163,8 @@ void init_cache(int cache_size, int block_size, int assoc, RPL repl_policy)
     BLOCK_size = block_size;
     ASSOCIATIVITY = assoc;
     REPL_policy = repl_policy;
+    num_BLOCK = CACHE_size / BLOCK_size;
+    
+    CACHE = (int)malloc(sizeof(int)*num_BLOCK);
     //initiallize cache
 }
