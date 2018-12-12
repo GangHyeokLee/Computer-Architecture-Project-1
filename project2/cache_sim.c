@@ -1,12 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 //some definitions
 #define FALSE 0
 #define TRUE 1
 #define ADDR long long
 #define BOOL char
+
+#define ADDRESSBITS 64
+#define WORDBITS 32
 
 typedef struct _MEMACCESS{
     ADDR addr;
@@ -16,10 +20,15 @@ typedef struct _MEMACCESS{
 typedef enum _RPL{LRU=0, RAND=1} RPL;
 
 
+int ** address_store, *** data_store;
+
 int CACHE_size;
 int ASSOCIATIVITY;
 int BLOCK_size;
+int num_BLOCK = 0;
 RPL REPLACEMENT_policy;
+
+int index, wordoffset, byteoffset, tag; //index size, word offset size, byte offset size, tag size
 
 //misc. function
 FILE* fp = 0;
@@ -39,6 +48,9 @@ ADDR insert_to_cache(ADDR addr);
 //print the simulation statistics
 print_stat();
 
+//other functions
+void make_decimal(int *decimal, int start, int size, int* address);
+
 
 //main
 int main(int argc, char*argv[])  
@@ -52,6 +64,7 @@ int main(int argc, char*argv[])
 	/*
     *  Read through command-line arguments for options.
     */
+	/*
     for (i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
             if (argv[i][1] == 's') 
@@ -80,7 +93,7 @@ int main(int argc, char*argv[])
                 }           
             }
         }
-    }
+    }*/
     
     /*
      * main body of cache simulator
@@ -97,6 +110,9 @@ int main(int argc, char*argv[])
         
         if(success!=TRUE)   //check the end of the trace file
             break;
+
+
+		printf("%d\n", isHit(new_access.addr));
 
     /*
         if(isHit(new_access.addr)==FALSE)   //check if the new memory access hit on the cache
@@ -161,6 +177,75 @@ void init_cache(int cache_size, int block_size, int assoc, RPL repl_policy)
     CACHE_size = cache_size;
     BLOCK_size = block_size;
     ASSOCIATIVITY = assoc;
-    REPL_policy = repl_policy;
+    REPLACEMENT_policy = repl_policy;
+    num_BLOCK = CACHE_size / BLOCK_size;
+    
+	byteoffset = 2;
+	wordoffset = log(BLOCK_size) / log(2) - 2;
+	index = log(CACHE_size / BLOCK_size) / log(2);
+	tag = ADDRESSBITS - byteoffset - wordoffset - index;
+
+	address_store = (int**)calloc((int)pow(2, index), sizeof(int*)); //address store
+
+	data_store = (int***)calloc((int)pow(2, index), sizeof(int**));
+
+	for (int i = 0; i < (int)pow(2,index); i++)
+	{
+		address_store = (int*)calloc(ADDRESSBITS, sizeof(int));
+		data_store[i] = (int**)calloc(ASSOCIATIVITY+1, sizeof(int*));
+
+		data_store[i][0] = (int*)calloc(1, sizeof(int)); //valid bit
+		for (int j = 1; j <= ASSOCIATIVITY; j++)
+		{
+			data_store[i][j] = (int*)calloc((1 + tag), sizeof(int)); //dirty tag 데이터 블록은 뺐습니다.
+		}
+	}	
+
     //initiallize cache
+}
+
+BOOL isHit(ADDR addr) //index로 찾아가서 valid 확인하고 tag비교
+{
+	int address[ADDRESSBITS];
+	int index_num = 0;
+	 
+	//주소 배열에 저장
+	for (int i = ADDRESSBITS - 1; i >= 0; i--) //instruction[63] = LSB, instruction[0] = MSB  tag, index, offset
+	{
+		address[i] = addr % 2;
+		addr = addr >> 1;
+	}
+
+	make_decimal(&index_num, tag, index, address); //index 얻음
+
+	if (data_store[index_num][0][0]) //valid data block
+	{
+		for (int i = 1; i <= ASSOCIATIVITY; i++) //set 돌아다니면서 일치하는 tag 찾기
+		{
+			if (strncmp(data_store[index_num][i]+1, address, tag) == 0) //data 블록의 두번째 칸부터 tag크기 만큼과 address의 tag 크기 만큼 비교하기
+			{
+				return TRUE;
+			}
+		}
+	}
+	
+	return FALSE; //invalid block 이거나 일치하는 tag 없을 때
+}
+
+void make_decimal(int *decimal, int start, int size, int* address)
+{
+	int i;
+
+	for (i = start; i < start + size; i++)
+	{
+		if (address[i])
+		{
+			(*decimal)++;
+		}
+		(*decimal) = (*decimal) << 1;
+	}
+
+	(*decimal) = (*decimal) >> 1;
+
+	return;
 }
