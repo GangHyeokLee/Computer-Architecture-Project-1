@@ -67,31 +67,30 @@ int main(int argc, char*argv[])
 	/*
 	*  Read through command-line arguments for options.
 	*/
-	/*
 	for (i = 1; i < argc; i++) {
-	if (argv[i][0] == '-') {
-	if (argv[i][1] == 's')
-	cache_size=atoi(argv[i+1]);
-	if (argv[i][1] == 'b')
-	block_size=atoi(argv[i+1]);
-	if (argv[i][1] == 'a')
-	assoc=atoi(argv[i+1]);
-	if (argv[i][1] == 'f')
-	strcpy(trace_file,argv[i+1]);
-	if (argv[i][1] == 'r')
-	{
-	if(strcmp(argv[i+1],"lru")==0)
-	repl_policy=LRU;
-	else if(strcmp(argv[i+1],"rand")==0)
-	repl_policy=RAND;
-	else
-	{
-	printf("unsupported replacement policy:%s\n",argv[i+1]);
-	return -1;
+		if (argv[i][0] == '-') {
+			if (argv[i][1] == 's')
+				cache_size = atoi(argv[i + 1]);
+			if (argv[i][1] == 'b')
+				block_size = atoi(argv[i + 1]);
+			if (argv[i][1] == 'a')
+				assoc = atoi(argv[i + 1]);
+			if (argv[i][1] == 'f')
+				strcpy(trace_file, argv[i + 1]);
+			if (argv[i][1] == 'r')
+			{
+				if (strcmp(argv[i + 1], "lru") == 0)
+					repl_policy = LRU;
+				else if (strcmp(argv[i + 1], "rand") == 0)
+					repl_policy = RAND;
+				else
+				{
+					printf("unsupported replacement policy:%s\n", argv[i + 1]);
+					return -1;
+				}
+			}
+		}
 	}
-	}
-	}
-	}*/
 
 	/*
 	* main body of cache simulator
@@ -352,7 +351,7 @@ void print_stat()
 	printf("\ncache_size: %dB \n", CACHE_size);
 	printf("block_size: %dB \n", BLOCK_size);
 	printf("associativity: %d \n", ASSOCIATIVITY);
-	printf("replacement policy: %s \n", REPLACEMENT_policy);
+	printf("replacement policy: %d \n", REPLACEMENT_policy);
 	printf("cache accesses: %d \n", hit_count + miss_count);
 	printf("cache_hits: %d \n", hit_count);
 	printf("cache_misses: %d \n", miss_count);
