@@ -193,6 +193,7 @@ BOOL isHit(ADDR addr) //index로 찾아가서 valid 확인하고 tag비교
 {
 	int index_num = 0;
 	int check = 0, validCheck = 1;
+	int LRUcheck = 0, LRUtemp = 0;
 
 	//주소 배열에 저장
 	for (int i = ADDRESSBITS - 1; i >= 0; i--) //instruction[63] = LSB, instruction[0] = MSB  tag, index, offset
@@ -206,25 +207,46 @@ BOOL isHit(ADDR addr) //index로 찾아가서 valid 확인하고 tag비교
 
 	for (int i = 0; i < ASSOCIATIVITY; i++) //set 돌아다니면서 일치하는 tag 찾기
 	{
+		check = 0;
 		if (data_store[index_num][i][0]) //valid data block
 		{
 			validCheck = 0;
 			for (int j = 0; j < tag; j++)
 			{
-				if (data_store[index_num][i][j + 2] != address[j])
+				if (data_store[index_num][i][j + LRUbit + 1] != address[j])
 					check = 1;
 			}
 
 			if (check == 0)
+			{
+				make_decimal(&LRUcheck, 1, LRUbit, data_store[index_num][i]); //lru 값 얻기
 				break;
+			}
 		}
 	}
 
 	if (validCheck == 1)
 		check = 1;
-	
+
 	if (check == 0)
 	{
+		if (REPLACEMENT_policy == 0)
+		{
+			for (int j = 0; j < ASSOCIATIVITY; j++)
+			{
+				LRUtemp = 0;
+				make_decimal(&LRUtemp, 1, LRUbit, data_store[index_num][j]); //lru 값 얻기
+				if (LRUtemp > LRUcheck)
+				{
+					LRUtemp--;
+					for (int k = LRUbit; k >= 1; k--) //instruction[63] = LSB, instruction[0] = MSB  tag, index, offset
+					{
+						data_store[index_num][j][k] = LRUtemp % 2;
+						LRUtemp = LRUtemp >> 1;
+					}
+				}
+			}
+		}
 		++hit_count;
 		return TRUE;
 	}
@@ -234,8 +256,7 @@ BOOL isHit(ADDR addr) //index로 찾아가서 valid 확인하고 tag비교
 
 ADDR insert_to_cache(ADDR addr)
 {
-	REPLACEMENT_policy = LRU;
-	int check = -1, index_num = 0, minLRU = 0, random = 0, LRUcheck = 0, LRUtemp=0;
+	int check = -1, index_num = 0, minLRU = 0, random = 0, LRUcheck = 0, LRUtemp = 0;
 
 	make_decimal(&index_num, tag, index, address); //index 얻음
 
@@ -245,7 +266,7 @@ ADDR insert_to_cache(ADDR addr)
 		{
 			data_store[index_num][i][0] = 1;
 			check = i;
-			
+
 			make_decimal(&LRUcheck, 1, LRUbit, data_store[index_num][i]); //lru 값 얻기
 
 			LRUtemp = ASSOCIATIVITY - 1;
@@ -261,7 +282,7 @@ ADDR insert_to_cache(ADDR addr)
 				for (int j = 0; j < ASSOCIATIVITY; j++)
 				{
 					LRUtemp = 0;
-					make_decimal(&LRUcheck, 1, LRUbit, data_store[index_num][j]); //lru 값 얻기
+					make_decimal(&LRUtemp, 1, LRUbit, data_store[index_num][j]); //lru 값 얻기
 					if (LRUtemp > LRUcheck)
 					{
 						LRUtemp--;
@@ -276,8 +297,7 @@ ADDR insert_to_cache(ADDR addr)
 
 			for (int j = 0; j < tag; j++)
 			{
-				data_store[index_num][i][j + 2] = address_change[j];
-				//printf("%d%d ", data_store[index_num][i][j + 2], address_change[j]);
+				data_store[index_num][i][LRUbit + 1] = address_change[j];
 			}
 			//LRU 방식일 시 값 갱신
 			break;
@@ -297,7 +317,7 @@ ADDR insert_to_cache(ADDR addr)
 			}
 
 			for (int i = 0; i < tag; i++)
-				data_store[index_num][minLRU][i + LRUbit + 1 ] = address_change[i];
+				data_store[index_num][minLRU][i + LRUbit + 1] = address_change[i];
 		}
 		else {
 			srand(time(NULL));
