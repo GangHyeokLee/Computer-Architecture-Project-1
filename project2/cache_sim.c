@@ -21,7 +21,7 @@ typedef struct _MEMACCESS {
 typedef enum _RPL { LRU = 0, RAND = 1 } RPL;
 
 
-int ** address_store, *** data_store;
+int *** data_store;
 
 int CACHE_size;
 int ASSOCIATIVITY;
@@ -31,7 +31,7 @@ int hit_count = 0;
 int miss_count = 0;
 RPL REPLACEMENT_policy;
 
-int index, wordoffset, byteoffset, tag; //index size, word offset size, byte offset size, tag size
+int index, wordoffset, byteoffset, tag, LRUbit; //index size, word offset size, byte offset size, tag size, LRU bit size
 int address[ADDRESSBITS], address_change[ADDRESSBITS];
 //misc. function
 FILE* fp = 0;
@@ -172,20 +172,17 @@ void init_cache(int cache_size, int block_size, int assoc, RPL repl_policy)
 	wordoffset = log(BLOCK_size) / log(2) - 2;
 	index = log(CACHE_size / BLOCK_size) / log(2);
 	tag = ADDRESSBITS - byteoffset - wordoffset - index;
-
-	address_store = (int**)calloc((int)pow(2, index), sizeof(int*)); //address store
+	LRUbit = (int)(log(ASSOCIATIVITY) / log(2));
 
 	data_store = (int***)calloc((int)pow(2, index), sizeof(int**));
 
 	for (int i = 0; i < (int)pow(2, index); i++)
 	{
-		address_store = (int*)calloc(ADDRESSBITS, sizeof(int));
-		data_store[i] = (int**)calloc(ASSOCIATIVITY + 1, sizeof(int*));
+		data_store[i] = (int**)calloc(ASSOCIATIVITY, sizeof(int*));
 
-		data_store[i][0] = (int*)calloc(1, sizeof(int)); //valid bit
-		for (int j = 1; j <= ASSOCIATIVITY; j++)
+		for (int j = 0; j < ASSOCIATIVITY; j++)
 		{
-			data_store[i][j] = (int*)calloc((2 + tag), sizeof(int)); //dirty tag 데이터 블록은 뺐습니다.
+			data_store[i][j] = (int*)calloc((1 + LRUbit + tag), sizeof(int)); //valid bit, LRU bit, tag입니다.  데이터 블록은 뺐습니다.
 		}
 	}
 
@@ -207,9 +204,9 @@ BOOL isHit(ADDR addr) //index로 찾아가서 valid 확인하고 tag비교
 
 	make_decimal(&index_num, tag, index, address); //index 얻음
 
-	for (int i = 1; i <= ASSOCIATIVITY; i++) //set 돌아다니면서 일치하는 tag 찾기
+	for (int i = 0; i < ASSOCIATIVITY; i++) //set 돌아다니면서 일치하는 tag 찾기
 	{
-		if (data_store[index_num][i][1]) //valid data block
+		if (data_store[index_num][i][0]) //valid data block
 		{
 			validCheck = 0;
 			for (int j = 0; j < tag; j++)
@@ -238,24 +235,43 @@ BOOL isHit(ADDR addr) //index로 찾아가서 valid 확인하고 tag비교
 ADDR insert_to_cache(ADDR addr)
 {
 	REPLACEMENT_policy = LRU;
-	int check = -1, index_num = 0, maxLRU = 0, random = 0, LRUcheck = 0;
+	int check = -1, index_num = 0, minLRU = 0, random = 0, LRUcheck = 0, LRUtemp=0;
 
 	make_decimal(&index_num, tag, index, address); //index 얻음
 
-	for (int i = 1; i <= ASSOCIATIVITY; i++) //set 돌아다니면서 빈 캐시가 존재할 시 그 곳에 저장
+	for (int i = 0; i < ASSOCIATIVITY; i++) //set 돌아다니면서 빈 캐시가 존재할 시 그 곳에 저장
 	{
-		if (data_store[index_num][i][1] == 0)
+		if (data_store[index_num][i][0] == 0)
 		{
-			data_store[index_num][i][1] = 1;
+			data_store[index_num][i][0] = 1;
 			check = i;
-			LRUcheck = data_store[index_num][i][0];
-			data_store[index_num][i][0] = ASSOCIATIVITY - 1;
+			
+			make_decimal(&LRUcheck, 1, LRUbit, data_store[index_num][i]); //lru 값 얻기
+
+			LRUtemp = ASSOCIATIVITY - 1;
+
+			for (int k = LRUbit; k >= 1; k--) //instruction[63] = LSB, instruction[0] = MSB  tag, index, offset
+			{
+				data_store[index_num][i][k] = LRUtemp % 2;
+				LRUtemp = LRUtemp >> 1;
+			}
 
 			if (REPLACEMENT_policy == 0)
 			{
-				for (int j = 1; j <= ASSOCIATIVITY; j++)
-					if (data_store[index_num][j][0] > LRUcheck)
-						data_store[index_num][j][0]--;
+				for (int j = 0; j < ASSOCIATIVITY; j++)
+				{
+					LRUtemp = 0;
+					make_decimal(&LRUcheck, 1, LRUbit, data_store[index_num][j]); //lru 값 얻기
+					if (LRUtemp > LRUcheck)
+					{
+						LRUtemp--;
+						for (int k = LRUbit; k >= 1; k--) //instruction[63] = LSB, instruction[0] = MSB  tag, index, offset
+						{
+							data_store[index_num][j][k] = LRUtemp % 2;
+							LRUtemp = LRUtemp >> 1;
+						}
+					}
+				}
 			}
 
 			for (int j = 0; j < tag; j++)
@@ -272,21 +288,22 @@ ADDR insert_to_cache(ADDR addr)
 	{
 		if (REPLACEMENT_policy == 0)
 		{
-			for (int j = 1; j <= ASSOCIATIVITY; j++)
+			for (int j = 0; j < ASSOCIATIVITY; j++)
 			{
-				if (maxLRU < data_store[index_num][j][0])
-					maxLRU = j;
+				LRUtemp = 0;
+				make_decimal(&LRUtemp, 1, LRUbit, data_store[index_num][j]);
+				if (minLRU < LRUtemp)
+					minLRU = j;
 			}
 
 			for (int i = 0; i < tag; i++)
-				data_store[index_num][maxLRU][i + 2] = address_change[i];
+				data_store[index_num][minLRU][i + LRUbit + 1 ] = address_change[i];
 		}
-
 		else {
 			srand(time(NULL));
 			random = rand() % ASSOCIATIVITY + 1;
 			for (int i = 0; i < tag; i++)
-				data_store[index_num][random][i + 2] = address[i];
+				data_store[index_num][random][i + 1 + LRUbit] = address[i];
 			printf("here3\n");
 		}
 	}
