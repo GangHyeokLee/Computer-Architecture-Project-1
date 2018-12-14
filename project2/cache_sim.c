@@ -212,14 +212,20 @@ BOOL isHit(ADDR addr) //index로 찾아가서 valid 확인하고 tag비교
 
 	for (int i = 1; i <= ASSOCIATIVITY; i++) //set 돌아다니면서 일치하는 tag 찾기
 	{
+		if (check == 1)
+			break;
+
 		if (data_store[index_num][i][1]) //valid data block
 		{
+			validCheck = 0;
 			for (int j = 0; j < tag; j++)
 				if (data_store[index_num][i][j + 2] != address[j])
-					check = 1;
+					check = 1; // tag 비교해서 
 		}
-		else check = 1;
 	}
+
+	if (validCheck == 1) // 전부 빈 경우
+		check = 1;
 
 	if (check == 0)
 	{
