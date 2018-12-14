@@ -315,6 +315,17 @@ ADDR insert_to_cache(ADDR addr)
 					minLRU = j;
 			}
 
+			for (int j = 0; j < ASSOCIATIVITY; j++)
+			{
+				make_decimal(&LRUtemp, 1, LRUbit, data_store[index_num][j]);
+				LRUtemp--;
+				for (int k = LRUbit; k >= 1; k--) //instruction[63] = LSB, instruction[0] = MSB  tag, index, offset
+				{
+					data_store[index_num][j][k] = LRUtemp % 2;
+					LRUtemp = LRUtemp >> 1;
+				}
+			}
+
 			for (int i = 0; i < tag; i++)
 				data_store[index_num][minLRU][i + LRUbit + 1] = address_change[i];
 		}
