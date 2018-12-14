@@ -206,9 +206,9 @@ BOOL isHit(ADDR addr) //index로 찾아가서 valid 확인하고 tag비교
 
 	for (int i = 0; i < ASSOCIATIVITY; i++) //set 돌아다니면서 일치하는 tag 찾기
 	{
-		check = 0;
 		if (data_store[index_num][i][0]) //valid data block
 		{
+			check = 0;
 			validCheck = 0;
 			for (int j = 0; j < tag; j++)
 			{
@@ -258,7 +258,7 @@ ADDR insert_to_cache(ADDR addr)
 	int check = -1, index_num = 0, minLRU = 0, random = 0, LRUcheck = 0, LRUtemp = 0;
 
 	make_decimal(&index_num, tag, index, address); //index 얻음
-
+	
 	for (int i = 0; i < ASSOCIATIVITY; i++) //set 돌아다니면서 빈 캐시가 존재할 시 그 곳에 저장
 	{
 		if (data_store[index_num][i][0] == 0)
@@ -320,10 +320,9 @@ ADDR insert_to_cache(ADDR addr)
 		}
 		else {
 			srand(time(NULL));
-			random = rand() % ASSOCIATIVITY + 1;
+			random = rand() % ASSOCIATIVITY;
 			for (int i = 0; i < tag; i++)
-				data_store[index_num][random][i + 1 + LRUbit] = address[i];
-			printf("here3\n");
+				data_store[index_num][random][i + 1 + LRUbit] = address_change[i];
 		}
 	}
 }
