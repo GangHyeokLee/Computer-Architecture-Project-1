@@ -32,7 +32,7 @@ int miss_count = 0;
 RPL REPLACEMENT_policy;
 
 int index, wordoffset, byteoffset, tag; //index size, word offset size, byte offset size, tag size
-int address[ADDRESSBITS];
+int address[ADDRESSBITS], address_change[ADDRESSBITS];
 //misc. function
 FILE* fp = 0;
 char trace_file[100] = "memtrace.trc";
@@ -110,10 +110,7 @@ int main(int argc, char*argv[])
 		{
 			insert_to_cache(new_access.addr);  //if miss, insert a cache block for the memory access to the cache
 		}
-		
-
 	}
-
 	print_stat();
 
 	return 0;
@@ -198,35 +195,37 @@ void init_cache(int cache_size, int block_size, int assoc, RPL repl_policy)
 BOOL isHit(ADDR addr) //index로 찾아가서 valid 확인하고 tag비교
 {
 	int index_num = 0;
-	int check = 0;
+	int check = 0, validCheck = 1;
 
 	//주소 배열에 저장
 	for (int i = ADDRESSBITS - 1; i >= 0; i--) //instruction[63] = LSB, instruction[0] = MSB  tag, index, offset
 	{
 		address[i] = addr % 2;
+		address_change[i] = address[i];
 		addr = addr >> 1;
 	}
-
 
 	make_decimal(&index_num, tag, index, address); //index 얻음
 
 	for (int i = 1; i <= ASSOCIATIVITY; i++) //set 돌아다니면서 일치하는 tag 찾기
 	{
-		if (check == 1)
-			break;
-
 		if (data_store[index_num][i][1]) //valid data block
 		{
 			validCheck = 0;
 			for (int j = 0; j < tag; j++)
+			{
 				if (data_store[index_num][i][j + 2] != address[j])
-					check = 1; // tag 비교해서 
+					check = 1;
+			}
+
+			if (check == 0)
+				break;
 		}
 	}
 
-	if (validCheck == 1) // 전부 빈 경우
+	if (validCheck == 1)
 		check = 1;
-
+	
 	if (check == 0)
 	{
 		++hit_count;
@@ -238,13 +237,16 @@ BOOL isHit(ADDR addr) //index로 찾아가서 valid 확인하고 tag비교
 
 ADDR insert_to_cache(ADDR addr)
 {
+	REPLACEMENT_policy = LRU;
 	int check = -1, index_num = 0, maxLRU = 0, random = 0, LRUcheck = 0;
 
 	make_decimal(&index_num, tag, index, address); //index 얻음
 
 	for (int i = 1; i <= ASSOCIATIVITY; i++) //set 돌아다니면서 빈 캐시가 존재할 시 그 곳에 저장
+	{
 		if (data_store[index_num][i][1] == 0)
 		{
+			data_store[index_num][i][1] = 1;
 			check = i;
 			LRUcheck = data_store[index_num][i][0];
 			data_store[index_num][i][0] = ASSOCIATIVITY - 1;
@@ -255,9 +257,16 @@ ADDR insert_to_cache(ADDR addr)
 					if (data_store[index_num][j][0] > LRUcheck)
 						data_store[index_num][j][0]--;
 			}
+
+			for (int j = 0; j < tag; j++)
+			{
+				data_store[index_num][i][j + 2] = address_change[j];
+				//printf("%d%d ", data_store[index_num][i][j + 2], address_change[j]);
+			}
 			//LRU 방식일 시 값 갱신
 			break;
 		}
+	}
 
 	if (check == -1)
 	{
@@ -270,8 +279,7 @@ ADDR insert_to_cache(ADDR addr)
 			}
 
 			for (int i = 0; i < tag; i++)
-				data_store[index_num][maxLRU][i + 2] = address[i];
-
+				data_store[index_num][maxLRU][i + 2] = address_change[i];
 		}
 
 		else {
@@ -279,9 +287,9 @@ ADDR insert_to_cache(ADDR addr)
 			random = rand() % ASSOCIATIVITY + 1;
 			for (int i = 0; i < tag; i++)
 				data_store[index_num][random][i + 2] = address[i];
+			printf("here3\n");
 		}
 	}
-
 }
 
 void make_decimal(int *decimal, int start, int size, int* address)
@@ -311,5 +319,5 @@ void print_stat()
 	printf("cache accesses: %d \n", hit_count + miss_count);
 	printf("cache_hits: %d \n", hit_count);
 	printf("cache_misses: %d \n", miss_count);
-	printf("cache_miss_rate: %3.1f \n", miss_count / (hit_count + miss_count) * 100);
+	printf("cache_miss_rate: %f \n", (double)miss_count / (hit_count + miss_count) * 100);
 }
