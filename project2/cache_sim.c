@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 //some definitions
 #define FALSE 0
@@ -12,12 +13,12 @@
 #define ADDRESSBITS 64
 #define WORDBITS 32
 
-typedef struct _MEMACCESS{
-    ADDR addr;
-    BOOL is_read;
+typedef struct _MEMACCESS {
+	ADDR addr;
+	BOOL is_read;
 } MEMACCESS;
 
-typedef enum _RPL{LRU=0, RAND=1} RPL;
+typedef enum _RPL { LRU = 0, RAND = 1 } RPL;
 
 
 int ** address_store, *** data_store;
@@ -29,14 +30,14 @@ int num_BLOCK = 0;
 RPL REPLACEMENT_policy;
 
 int index, wordoffset, byteoffset, tag; //index size, word offset size, byte offset size, tag size
-
-//misc. function
+int address[ADDRESSBITS];
+										//misc. function
 FILE* fp = 0;
-char trace_file[100]="memtrace.trc";
+char trace_file[100] = "memtrace.trc";
 BOOL read_new_memaccess(MEMACCESS*);  //read new memory access from the memory trace file (already implemented)
 
 
-//configure the cache
+									  //configure the cache
 void init_cache(int cache_size, int block_size, int assoc, RPL repl_policy);
 
 //check if the memory access hits on the cache
@@ -53,133 +54,131 @@ void make_decimal(int *decimal, int start, int size, int* address);
 
 
 //main
-int main(int argc, char*argv[])  
+int main(int argc, char*argv[])
 {
-    int i=0;
-    int cache_size=32768;
-    int assoc=8;
-    int block_size=32;
-    RPL repl_policy=LRU;
+	int i = 0;
+	int cache_size = 32768;
+	int assoc = 8;
+	int block_size = 32;
+	RPL repl_policy = LRU;
 
 	/*
-    *  Read through command-line arguments for options.
-    */
+	*  Read through command-line arguments for options.
+	*/
 	/*
-    for (i = 1; i < argc; i++) {
-        if (argv[i][0] == '-') {
-            if (argv[i][1] == 's') 
-                cache_size=atoi(argv[i+1]);
-            
-            if (argv[i][1] == 'b')
-                block_size=atoi(argv[i+1]);
-            
-            if (argv[i][1] == 'a')
-                assoc=atoi(argv[i+1]);
-            
-            if (argv[i][1] == 'f')
-                strcpy(trace_file,argv[i+1]);
+	for (i = 1; i < argc; i++) {
+	if (argv[i][0] == '-') {
+	if (argv[i][1] == 's')
+	cache_size=atoi(argv[i+1]);
 
+	if (argv[i][1] == 'b')
+	block_size=atoi(argv[i+1]);
 
-            if (argv[i][1] == 'r')
-            {
-                if(strcmp(argv[i+1],"lru")==0)
-                    repl_policy=LRU;
-                else if(strcmp(argv[i+1],"rand")==0)
-                    repl_policy=RAND;
-                else
-                {
-                    printf("unsupported replacement policy:%s\n",argv[i+1]);
-                    return -1;
-                }           
-            }
-        }
-    }*/
-    
-    /*
-     * main body of cache simulator
-    */
-    
-    init_cache(cache_size, block_size, assoc, repl_policy);//my
-    //configure the cache with the cache parameters specified in the input arguments
-    
-    while(1)
+	if (argv[i][1] == 'a')
+	assoc=atoi(argv[i+1]);
+
+	if (argv[i][1] == 'f')
+	strcpy(trace_file,argv[i+1]);
+	if (argv[i][1] == 'r')
 	{
-        MEMACCESS new_access;
-        
-        BOOL success=read_new_memaccess(&new_access);  //read new memory access from the memory trace file
-        
-        if(success!=TRUE)   //check the end of the trace file
-            break;
+	if(strcmp(argv[i+1],"lru")==0)
+	repl_policy=LRU;
+	else if(strcmp(argv[i+1],"rand")==0)
+	repl_policy=RAND;
+	else
+	{
+	printf("unsupported replacement policy:%s\n",argv[i+1]);
+	return -1;
+	}
+	}
+	}
+	}*/
+
+	/*
+	* main body of cache simulator
+	*/
+
+	init_cache(cache_size, block_size, assoc, repl_policy);//my
+														   //configure the cache with the cache parameters specified in the input arguments
+
+	while (1)
+	{
+		MEMACCESS new_access;
+
+		BOOL success = read_new_memaccess(&new_access);  //read new memory access from the memory trace file
+
+		if (success != TRUE)   //check the end of the trace file
+			break;
 
 
 		printf("%d\n", isHit(new_access.addr));
 
-    /*
-        if(isHit(new_access.addr)==FALSE)   //check if the new memory access hit on the cache
-        {
-            insert_to_cache(new_access.addr);  //if miss, insert a cache block for the memory access to the cache
-        }
-    */
+		/*
+		if(isHit(new_access.addr)==FALSE)   //check if the new memory access hit on the cache
+		{
+		insert_to_cache(new_access.addr);  //if miss, insert a cache block for the memory access to the cache
+		}
+		*/
 
 	}
-    
-    // print statistics here
+
+	// print statistics here
 
 	return 0;
 }
 
 
 /*
- * read a new memory access from the memory trace file
- */
+* read a new memory access from the memory trace file
+*/
 BOOL read_new_memaccess(MEMACCESS* mem_access)
 {
-    ADDR access_addr;
-    char access_type[10];
-    /*
-     * open the mem trace file
-     */
+	ADDR access_addr;
+	char access_type[10];
+	/*
+	* open the mem trace file
+	*/
 
-    if(fp==NULL)
-    {
-        fp=fopen(trace_file,"r");
-        if(fp==NULL)
-        {
-            fprintf(stderr,"error opening file");
-            exit(2);
+	if (fp == NULL)
+	{
+		fp = fopen(trace_file, "r");
+		if (fp == NULL)
+		{
+			fprintf(stderr, "error opening file");
+			exit(2);
 
-        }   
-    }
+		}
+	}
 
-    if(mem_access==NULL)
-    {
-        fprintf(stderr,"MEMACCESS pointer is null!");
-        exit(2);
-    }
+	if (mem_access == NULL)
+	{
+		fprintf(stderr, "MEMACCESS pointer is null!");
+		exit(2);
+	}
 
-    if(fscanf(fp,"%llx %s", &access_addr, &access_type)!=EOF)
-    {
-        mem_access->addr=access_addr;
-        if(strcmp(access_type,"RD")==0)
-            mem_access->is_read=TRUE;
-        else
-            mem_access->is_read=FALSE;
-        
-        return TRUE;
-    }       
-    else
-        return FALSE;
+	if (fscanf(fp, "%llx %s", &access_addr, &access_type) != EOF)
+	{
+		mem_access->addr = access_addr;
+		if (strcmp(access_type, "RD") == 0)
+			mem_access->is_read = TRUE;
+		else
+			mem_access->is_read = FALSE;
+
+		return TRUE;
+	}
+	else
+		return FALSE;
 
 }
 
 void init_cache(int cache_size, int block_size, int assoc, RPL repl_policy)
 {
-    CACHE_size = cache_size;
-    BLOCK_size = block_size;
-    ASSOCIATIVITY = assoc;
-    REPLACEMENT_policy = repl_policy;
-    num_BLOCK = CACHE_size / BLOCK_size;
-    
+	CACHE_size = cache_size;
+	BLOCK_size = block_size;
+	ASSOCIATIVITY = assoc;
+	REPLACEMENT_policy = repl_policy;
+	num_BLOCK = CACHE_size / BLOCK_size;
+
 	byteoffset = 2;
 	wordoffset = log(BLOCK_size) / log(2) - 2;
 	index = log(CACHE_size / BLOCK_size) / log(2);
@@ -189,47 +188,88 @@ void init_cache(int cache_size, int block_size, int assoc, RPL repl_policy)
 
 	data_store = (int***)calloc((int)pow(2, index), sizeof(int**));
 
-	for (int i = 0; i < (int)pow(2,index); i++)
+	for (int i = 0; i < (int)pow(2, index); i++)
 	{
 		address_store = (int*)calloc(ADDRESSBITS, sizeof(int));
-		data_store[i] = (int**)calloc(ASSOCIATIVITY+1, sizeof(int*));
+		data_store[i] = (int**)calloc(ASSOCIATIVITY + 1, sizeof(int*));
 
 		data_store[i][0] = (int*)calloc(1, sizeof(int)); //valid bit
 		for (int j = 1; j <= ASSOCIATIVITY; j++)
 		{
-			data_store[i][j] = (int*)calloc((1 + tag), sizeof(int)); //dirty tag µ•¿Ã≈Õ ∫Ì∑œ¿∫ ª∞Ω¿¥œ¥Ÿ.
+			data_store[i][j] = (int*)calloc((2 + tag), sizeof(int)); //dirty tag Îç∞Ïù¥ÌÑ∞ Î∏îÎ°ùÏùÄ Î∫êÏäµÎãàÎã§.
 		}
-	}	
+	}
 
-    //initiallize cache
+	//initiallize cache
 }
 
-BOOL isHit(ADDR addr) //index∑Œ √£æ∆∞°º≠ valid »Æ¿Œ«œ∞Ì tag∫Ò±≥
+BOOL isHit(ADDR addr) //indexÎ°ú Ï∞æÏïÑÍ∞ÄÏÑú valid ÌôïÏù∏ÌïòÍ≥† tagÎπÑÍµê
 {
-	int address[ADDRESSBITS];
 	int index_num = 0;
-	 
-	//¡÷º“ πËø≠ø° ¿˙¿Â
+
+	//Ï£ºÏÜå Î∞∞Ïó¥Ïóê Ï†ÄÏû•
 	for (int i = ADDRESSBITS - 1; i >= 0; i--) //instruction[63] = LSB, instruction[0] = MSB  tag, index, offset
 	{
 		address[i] = addr % 2;
 		addr = addr >> 1;
 	}
 
-	make_decimal(&index_num, tag, index, address); //index æÚ¿Ω
+	make_decimal(&index_num, tag, index, address); //index ÏñªÏùå
 
-	if (data_store[index_num][0][0]) //valid data block
-	{
-		for (int i = 1; i <= ASSOCIATIVITY; i++) //set µπæ∆¥Ÿ¥œ∏Èº≠ ¿œƒ°«œ¥¬ tag √£±‚
-		{
-			if (strncmp(data_store[index_num][i]+1, address, tag) == 0) //data ∫Ì∑œ¿« µŒπ¯¬∞ ƒ≠∫Œ≈Õ tag≈©±‚ ∏∏≈≠∞˙ address¿« tag ≈©±‚ ∏∏≈≠ ∫Ò±≥«œ±‚
-			{
+	for (int i = 1; i <= ASSOCIATIVITY; i++) //set ÎèåÏïÑÎã§ÎãàÎ©¥ÏÑú ÏùºÏπòÌïòÎäî tag Ï∞æÍ∏∞
+		if (data_store[index_num][0][1]) //valid data block
+			if (strncmp(data_store[index_num][0][i] + 2, address, tag) == 0) //data Î∏îÎ°ùÏùò ÎëêÎ≤àÏß∏ Ïπ∏Î∂ÄÌÑ∞ tagÌÅ¨Í∏∞ ÎßåÌÅºÍ≥º addressÏùò tag ÌÅ¨Í∏∞ ÎßåÌÅº ÎπÑÍµêÌïòÍ∏∞
 				return TRUE;
+
+	return FALSE; //invalid block Ïù¥Í±∞ÎÇò ÏùºÏπòÌïòÎäî tag ÏóÜÏùÑ Îïå
+}
+
+ADDR insert_to_cache(ADDR addr)
+{
+	int check = -1, index_num = 0, maxLRU = 0, random = 0, LRUcheck = 0;
+
+	make_decimal(&index_num, tag, index, address); //index ÏñªÏùå
+
+	for (int i = 1; i <= ASSOCIATIVITY; i++) //set ÎèåÏïÑÎã§ÎãàÎ©¥ÏÑú Îπà Ï∫êÏãúÍ∞Ä Ï°¥Ïû¨Ìï† Ïãú Í∑∏ Í≥≥Ïóê Ï†ÄÏû•
+		if (data_store[index_num][i][1] == 0)
+		{
+			check = i;
+			LRUcheck = data_store[index_num][i][0];
+			data_store[index_num][i][0] = ASSOCIATIVITY - 1;
+
+			if (REPLACEMENT_policy == 0)
+			{
+				for (int j = 1; j <= ASSOCIATIVITY; j++)
+					if (data_store[index_num][j][0] > LRUcheck)
+						data_store[index_num][j][0]--;
 			}
+			//LRU Î∞©ÏãùÏùº Ïãú Í∞í Í∞±Ïã†
+			break;
+		}
+
+	if (check == -1)
+	{
+		if (REPLACEMENT_policy == 0)
+		{
+			for (int j = 1; j <= ASSOCIATIVITY; j++)
+			{
+				if (maxLRU < data_store[index_num][j][0])
+					maxLRU = j;
+			}
+
+			for (int i = 0; i < ADDRESSBITS; i++)
+				data_store[index_num][maxLRU][i] = address[i];
+
+		}
+
+		else {
+			srand(time(NULL));
+			random = rand() % ASSOCIATIVITY + 1;
+			for (int i = 0; i < ADDRESSBITS; i++)
+				data_store[index_num][random][i] = address[i];
 		}
 	}
-	
-	return FALSE; //invalid block ¿Ã∞≈≥™ ¿œƒ°«œ¥¬ tag æ¯¿ª ∂ß
+
 }
 
 void make_decimal(int *decimal, int start, int size, int* address)
