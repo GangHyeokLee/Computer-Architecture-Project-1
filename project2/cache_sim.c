@@ -49,7 +49,7 @@ BOOL isHit(ADDR addr);
 ADDR insert_to_cache(ADDR addr);
 
 //print the simulation statistics
-print_stat();
+void print_stat();
 
 //other functions
 void make_decimal(int *decimal, int start, int size, int* address);
@@ -109,17 +109,15 @@ int main(int argc, char*argv[])
         if (success != TRUE)   //check the end of the trace file
             break;
         
-        
-        printf("%d\n", isHit(new_access.addr));
-        
-        /*
          if(isHit(new_access.addr)==FALSE)   //check if the new memory access hit on the cache
          {
          insert_to_cache(new_access.addr);  //if miss, insert a cache block for the memory access to the cache
          }
-         */
+
         
     }
+    
+     print_stat();
     
     // print statistics here
     
@@ -260,16 +258,16 @@ ADDR insert_to_cache(ADDR addr)
                     maxLRU = j;
             }
             
-            for (int i = 0; i < ADDRESSBITS; i++)
-                data_store[index_num][maxLRU][i] = address[i];
+            for (int i = 0; i < tag; i++)
+                data_store[index_num][maxLRU][i + 2] = address[i];
             
         }
         
         else {
             srand(time(NULL));
             random = rand() % ASSOCIATIVITY + 1;
-            for (int i = 0; i < ADDRESSBITS; i++)
-                data_store[index_num][random][i] = address[i];
+            for (int i = 0; i < tag; i++)
+                data_store[index_num][random][i + 2] = address[i];
         }
     }
     
