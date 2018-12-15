@@ -10,6 +10,8 @@
 #define ADDR long long
 #define BOOL char
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #define ADDRESSBITS 64
 #define WORDBITS 32
 
@@ -46,7 +48,7 @@ void init_cache(int cache_size, int block_size, int assoc, RPL repl_policy);
 BOOL isHit(ADDR addr);
 
 //insert a cache block for a memory access
-ADDR insert_to_cache(ADDR addr);
+void insert_to_cache(ADDR addr);
 
 //print the simulation statistics
 void print_stat();
@@ -168,14 +170,14 @@ void init_cache(int cache_size, int block_size, int assoc, RPL repl_policy)
 	num_BLOCK = CACHE_size / BLOCK_size;
 
 	byteoffset = 2;
-	wordoffset = log(BLOCK_size) / log(2) - 2;
-	index = log(CACHE_size / BLOCK_size) / log(2);
+	wordoffset = log((double)BLOCK_size) / log((double)2) - 2;
+	index = log((double)CACHE_size / BLOCK_size) / log((double)2);
 	tag = ADDRESSBITS - byteoffset - wordoffset - index;
-	LRUbit = (int)(log(ASSOCIATIVITY) / log(2));
+	LRUbit = (int)(log((double)ASSOCIATIVITY) / log((double)2));
 
-	data_store = (int***)calloc((int)pow(2, index), sizeof(int**));
+	data_store = (int***)calloc((int)pow((double)2, index), sizeof(int**));
 
-	for (int i = 0; i < (int)pow(2, index); i++)
+	for (int i = 0; i < (int)pow((double)2, index); i++)
 	{
 		data_store[i] = (int**)calloc(ASSOCIATIVITY, sizeof(int*));
 
@@ -253,7 +255,7 @@ BOOL isHit(ADDR addr) //index로 찾아가서 valid 확인하고 tag비교
 	return FALSE; //invalid block 이거나 일치하는 tag 없을 때
 }
 
-ADDR insert_to_cache(ADDR addr)
+void insert_to_cache(ADDR addr)
 {
 	int check = -1, index_num = 0, minLRU = 0, random = 0, LRUcheck = 0, LRUtemp = 0;
 
